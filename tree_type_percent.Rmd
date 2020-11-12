@@ -1,0 +1,88 @@
+---
+title: "evergreen_deciduous"
+author: "Veronica Weber"
+date: "11/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#upload packages
+library(tidyverse)
+library(tidyr)
+library(janitor)
+```
+
+```{r}
+# upload the dataframe
+full_inventory <- read_csv("tacoma_tp_tree_inventory.csv") %>% 
+  clean_names() %>% 
+  rename(scientific_name = "latin_name")
+```
+
+```{r}
+### ----- Tidy data into just tree species, leaf type and id number -----------
+
+# create new data frame only isolating tree names and type to find percent deciduous and evergreen overall
+tree_species <- full_inventory %>% 
+  select(c(common_name,
+           genus,
+           scientific_name,
+           leaf_type,
+           primary_id,
+           address))
+```
+
+```{r}
+### ---- Tidy data frame to remove unknown tree species -------------
+
+# because some of the catalogued trees are missing species classification (both common name and scientific name marked as "other" and "unknown"), we will need to remove these observations from the analysis, first I want to find out how many trees will be removed. I will also remove the trees that are classified as both evergreen and deciduous.
+
+# use the count command to count number of trees that are classified as 'unknown', 'other' or 'both' as well as the 'na' values
+
+other_count <- full_inventory %>% 
+  count(scientific_name == "Other")
+# There are 884 trees marked as "Other" 
+
+unknown_count <- full_inventory %>% 
+  count(scientific_name == "unknown")
+# there are 32 trees marked as unknown 
+
+na_count <- full_inventory %>% 
+  count(scientific_name == "NA")
+# there are 84 missing values marked as NA
+
+both_count <- full_inventory %>% 
+  count(leaf_type == "both") 
+# there are 42 trees marked as both
+
+# alltogether, 1042 trees will be removed from our analysis of evergreen/deciduous
+
+# remove the other,unknown, both and assemble into a new data frame 
+tree_species_tidy <- tree_species %>% 
+  filter(!(scientific_name == "Other" |
+             scientific_name == "unknown" |
+             leaf_type == "both"))
+
+# we will be analyzing a dataset of 16,300 trees 
+         
+```
+
+```{r}
+### ------------- Find percent evergreen and deciduous ------------
+
+# Count the number of evergreen and deciduous trees and then find the percent 
+percent_evergreen_deciduous <- tree_species_tidy %>% 
+  group_by(leaf_type) %>% 
+  summarise(tree_type_count = n()) %>% 
+  mutate(percent = tree_type_count / sum(tree_type_count))
+# there are 12,314 deciduous trees and 3,986 evergreen trees in this inventory
+
+# This inventory suggests that roughly 75% of trees in Tacoma are deciduous and 24% are evergreen
+
+
+```
+
