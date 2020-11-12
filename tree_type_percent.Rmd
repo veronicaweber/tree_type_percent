@@ -18,7 +18,7 @@ library(janitor)
 
 ```{r}
 # upload the dataframe
-full_inventory <- read_csv("tacoma_tp_tree_inventory.csv") %>% 
+full_inventory <- read_csv("raw_data/tacoma_tp_tree_inventory.csv") %>% 
   clean_names() %>% 
   rename(scientific_name = "latin_name")
 ```
