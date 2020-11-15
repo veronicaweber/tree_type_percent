@@ -83,6 +83,10 @@ percent_evergreen_deciduous <- tree_species_tidy %>%
 
 # This inventory suggests that roughly 75% of trees in Tacoma are deciduous and 24% are evergreen
 
+```
 
+```{r}
+# export the sensor dataframe to folder
+write_csv(percent_evergreen_deciduous, path = "data_complete/percent_evergreen_deciduous.csv")
 ```
 
